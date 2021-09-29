@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>symb_eval.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>symb_eval.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>CSC410 Final Project: Enumerative Synthesizer
+by Victor Nicolet and Danya Lette</p>
+<p>This file defines the Evaluator class, which is used to do symbolic
+evaluation of an expression.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">lang.ast</span> <span class="kn">import</span> <span class="o">*</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>TypeError that is raised during symbolic evaluation.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">EvaluationTypeError</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>TypeError that is raised during symbolic evaluation
+that is due to an undefined hole.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">EvaluationUndefinedHoleError</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>An Evaluator can be used to symbolically evaluate an expression.
+An Evaluator should be initialized with a map from hole name to
+the expression of the hole.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">Evaluator</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>@param hole_defs A Mapping from string to expression, meant to be used
+to replace a hole variable by its definition.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hole_defs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Expression</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">hole_defs</span> <span class="o">=</span> <span class="n">hole_defs</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>The evaluate_expr symbolically evaluates the expression ex
+in the environment var_defs.
+@param var_defs A Mapping from string to expression, meant to
+be used as the definition of the environment.
+@param ex The expression to evaluate.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">evaluate_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_defs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Expression</span><span class="p">],</span>
+                      <span class="n">ex</span><span class="p">:</span> <span class="n">Expression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expression</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Case 1 : ex is a binary expression.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">BinaryExpr</span><span class="p">):</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">operator</span>
+            <span class="n">lhs</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">left_operand</span>
+            <span class="n">rhs</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">right_operand</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>TODO: Do something with op, lhs and rhs&hellip;
+op = &hellip;
+lhs = &hellip;
+rhs = &hellip;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">result</span> <span class="o">=</span> <span class="n">BinaryExpr</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Case 2 : ex is a unary expression.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">UnaryExpr</span><span class="p">):</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">operator</span>
+            <span class="n">operand</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">operand</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>TODO: Do something with op and ope&hellip;
+op = &hellip;
+operand = &hellip;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">result</span> <span class="o">=</span> <span class="n">UnaryExpr</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">operand</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Case 3 : ex is a if-then-else expression (a ternary expression).</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">Ite</span><span class="p">):</span>
+            <span class="n">cond</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">cond</span>
+            <span class="n">true_branch</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">true_br</span>
+            <span class="n">false_branch</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">false_br</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>TODO: Do something with cond, true_branch and false_branch
+cond = &hellip;
+true_branch = &hellip;
+false_branch = &hellip;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">result</span> <span class="o">=</span> <span class="n">Ite</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">true_branch</span><span class="p">,</span> <span class="n">false_branch</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>Case 4: ex is a variable</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">var_defs</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>TODO: what do we return if var has a definition?</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="n">ex</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hole_defs</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>TODO: what do we return if var is a hole?</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>If a variable has no definition and is not a hole
+(.e.g it&rsquo;s an input), then it is unchanged.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">result</span> <span class="o">=</span> <span class="n">ex</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>Case 5 : ex i a boolean constant</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="p">(</span><span class="n">BoolConst</span><span class="p">,</span> <span class="n">IntConst</span><span class="p">)):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">ex</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>Case 6 : ex is GrammarInteger or GramamrVar: this should
+never happen during evaluation!</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="p">(</span><span class="n">GrammarInteger</span><span class="p">,</span> <span class="n">GrammarVar</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">EvaluationTypeError</span><span class="p">(</span>
+                <span class="s2">&quot;GrammarInteger and GrammarVar should not appear in</span><span class="se">\</span>
+<span class="s2">                  expressions that are evaluated.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>Case 7 should never be reached.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">Expression</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">EvaluationTypeError</span><span class="p">(</span>
+                <span class="s2">&quot;Argument is an Expression of unknown type!</span><span class="se">\n\</span>
+<span class="s2">                 Maybe you forgot to implement a case in </span><span class="se">\</span>
+<span class="s2">                     symb_eval.Evaluator.evaluate_expr&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p>Check that all of the program&rsquo;s holes have been defined.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">check_holes_have_defs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">hole_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">hole_def</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">hole_def</span> <span class="ow">in</span> <span class="n">prog</span><span class="o">.</span><span class="n">holes</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">hole_name</span> <span class="ow">in</span> <span class="n">hole_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hole_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hole_defs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">EvaluationUndefinedHoleError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Evaluator should define the hole </span><span class="si">{</span><span class="n">hole_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>Evaluate performs a few checks and then evaluates
+the assignments.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expression</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_holes_have_defs</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">EvaluationUndefinedHoleError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      <p>Optionally, do something with this info&hellip;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">raise</span> <span class="n">exception</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      <p>Initially, the environment is empty since no variables are
+defined.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">environment</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">assignment</span> <span class="ow">in</span> <span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p>For each assignment, first evaluate the expression with
+the current environment,</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">assignment</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      <p>and then update the environment with that expression for
+the assigned variable.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">environment</span><span class="p">[</span><span class="n">assignment</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">expr</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      <p>Finally, return the evaluated constraint once all assignments
+have been evaluated.
+At the end of evaluation, the expression returned should only
+contain variables that are defined as input.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">prog</span><span class="o">.</span><span class="n">constraint</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

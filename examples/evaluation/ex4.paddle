@@ -1,0 +1,8 @@
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input b : bool;
+define is_even : bool = (x % 2) = 0;
+define is_odd : bool = (x % 2) = 1;
+assert (is_even || is_odd) && (!(is_even && is_odd));

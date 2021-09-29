@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>eval_test.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>eval_test.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lang.symb_eval</span> <span class="kn">import</span> <span class="n">EvaluationUndefinedHoleError</span><span class="p">,</span> <span class="n">Evaluator</span>
+<span class="kn">from</span> <span class="nn">lang.ast</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
+<span class="kn">from</span> <span class="nn">lang.paddle</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">lark</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">lang.transformer</span> <span class="kn">import</span> <span class="n">TransformerVariableException</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">TestEval</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_interface_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eval_mname</span> <span class="o">=</span> <span class="s2">&quot;evaluate&quot;</span>
+        <span class="n">eval_expr_mname</span> <span class="o">=</span> <span class="s2">&quot;evaluate_expr&quot;</span>
+        <span class="n">evaluate_exists</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Evaluator</span><span class="p">,</span> <span class="n">eval_mname</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">Evaluator</span><span class="p">,</span> <span class="n">eval_mname</span><span class="p">))</span>
+        <span class="n">evaluate_expr_exists</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Evaluator</span><span class="p">,</span> <span class="n">eval_expr_mname</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">Evaluator</span><span class="p">,</span> <span class="n">eval_expr_mname</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">evaluate_exists</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Make sure the </span><span class="si">%s</span><span class="s2"> method in Evaluator is implemented.&quot;</span> <span class="o">%</span> <span class="n">eval_mname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">evaluate_expr_exists</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Make sure the </span><span class="si">%s</span><span class="s2"> method in Evaluator is implemented.&quot;</span> <span class="o">%</span> <span class="n">eval_expr_mname</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_example_max2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/max2.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;TestEval is looking for </span><span class="si">%s</span><span class="s2">. Make sure file exists.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">empty</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">({})</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Evaluating this program with no hole definitions should raise an EvaluationUndefinedHoleError</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">EvaluationUndefinedHoleError</span><span class="p">):</span>
+            <span class="n">empty</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Now let&rsquo;s give definitions</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">inputs</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;In </span><span class="si">%s</span><span class="s2">, we expected exactly 2 inputs.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">e1</span> <span class="o">=</span> <span class="n">BinaryExpr</span><span class="p">(</span><span class="n">BinaryOperator</span><span class="o">.</span><span class="n">GREATER</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">e2</span> <span class="o">=</span> <span class="n">Ite</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">defined</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">({</span><span class="s2">&quot;hmax&quot;</span><span class="p">:</span> <span class="n">e2</span><span class="p">})</span>
+        <span class="n">prog_res</span> <span class="o">=</span> <span class="n">defined</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>The result should be an expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">Expression</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>In this particular case, the expression should be a binary expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">BinaryExpr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>and the operator should be &amp;&amp;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">AND</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>there is only two variables in prog_res</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">uses</span><span class="p">()),</span> <span class="mi">2</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_example_mult_to_add_true</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/verification/mult_to_add_true.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;TestEval is looking for </span><span class="si">%s</span><span class="s2">. Make sure file exists.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">empty</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">({})</span>
+        <span class="n">prog_res</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>The result should be an expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">Expression</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>In this particular case, the expression should be a binary expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">BinaryExpr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>and the operator should be &amp;&amp;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">EQUALS</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>there is only one variable in prog_res</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">uses</span><span class="p">()),</span> <span class="mi">1</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Evaluate the expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">lhs</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">0</span><span class="p">)},</span> <span class="n">prog_res</span><span class="o">.</span><span class="n">left_operand</span><span class="p">)</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">0</span><span class="p">)},</span> <span class="n">prog_res</span><span class="o">.</span><span class="n">right_operand</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>These expressions can be evaluated in Python directly</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lhs</span><span class="p">))</span> <span class="o">==</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rhs</span><span class="p">)))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_example_mult_to_add_false</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/verification/mult_to_add_false.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;TestEval is looking for </span><span class="si">%s</span><span class="s2">. Make sure file exists.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">empty</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">({})</span>
+        <span class="n">prog_res</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>The result should be an expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">Expression</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>In this particular case, the expression should be a binary expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">BinaryExpr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>and the operator should be &amp;&amp;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">EQUALS</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>there is only one variable in prog_res</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">uses</span><span class="p">()),</span> <span class="mi">1</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>Evaluate the expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">lhs</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">1</span><span class="p">)},</span> <span class="n">prog_res</span><span class="o">.</span><span class="n">left_operand</span><span class="p">)</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">1</span><span class="p">)},</span> <span class="n">prog_res</span><span class="o">.</span><span class="n">right_operand</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>These expressions can be evaluated in Python directly
+They should be different (3 != 4)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lhs</span><span class="p">))</span> <span class="o">==</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rhs</span><span class="p">)))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_example_sum4c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/verification/sum4c.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;TestEval is looking for </span><span class="si">%s</span><span class="s2">. Make sure file exists.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">empty</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">({})</span>
+        <span class="n">prog_res</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">prog</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>The result should be an expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">Expression</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>In this particular case, the expression should be a binary expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">prog_res</span><span class="p">,</span> <span class="n">BinaryExpr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      <p>and the operator should be &amp;&amp;</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">EQUALS</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      <p>there is only 4 variables in prog_res</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog_res</span><span class="o">.</span><span class="n">uses</span><span class="p">()),</span> <span class="mi">4</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      <p>Evaluate the expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">model</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span>
+            <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">4</span><span class="p">)}</span>
+        <span class="n">lhs</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prog_res</span><span class="o">.</span><span class="n">left_operand</span><span class="p">)</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">empty</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prog_res</span><span class="o">.</span><span class="n">right_operand</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p>These expressions can be evaluated in Python directly
+They should be different (3 != 4)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lhs</span><span class="p">))</span> <span class="o">==</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rhs</span><span class="p">)))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_verif_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">examples_directory</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/verification&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.paddle&quot;</span><span class="p">):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      <p>Parse</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ast</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Exception was raised when parsing </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-33'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-33'>#</a>
+      </div>
+      <p>Evaluate from empty</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ev</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">({})</span>
+                    <span class="n">ev</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Exception was raised when parsing </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-34'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-34'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_eval_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">examples_directory</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/evaluation&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.paddle&quot;</span><span class="p">):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-35'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-35'>#</a>
+      </div>
+      <p>Parse</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ast</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Exception was raised when parsing </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-36'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-36'>#</a>
+      </div>
+      <p>Check variables x,y,z,w, b exist</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">x</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_var_of_name</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_var_of_name</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_var_of_name</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_var_of_name</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_var_of_name</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                    <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">b</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;The examples in examples/evaluation should have exactly</span><span class="se">\n\</span>
+<span class="s2">                        x,y,z and w as integers inputs,</span><span class="se">\n\</span>
+<span class="s2">                        and b as boolean input.</span><span class="se">\n\</span>
+<span class="s2">                        i.e. they should start with:</span><span class="se">\n\</span>
+<span class="s2">                        input x : int;</span><span class="se">\n\</span>
+<span class="s2">                        input y : int;</span><span class="se">\n\</span>
+<span class="s2">                        input z : int;</span><span class="se">\n\</span>
+<span class="s2">                        input b : bool;</span><span class="se">\n\</span>
+<span class="s2">                    </span><span class="si">%s</span><span class="s2"> doesn&#39;t match that specification.&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span>
+                    <span class="n">ast</span><span class="p">,</span> <span class="n">Program</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;ast must be an instance of Program&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-37'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-37'>#</a>
+      </div>
+      <p>Evaluate from empty</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="k">try</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-38'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-38'>#</a>
+      </div>
+      <p>Create an evaluator with no hole definitions.
+The files in examples/evaluation should not contain any holes.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="n">ev</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">({})</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span>
+                        <span class="n">ev</span><span class="p">,</span> <span class="n">Evaluator</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;ev must be an instance of Evaluator&quot;</span><span class="p">)</span>
+
+                    <span class="n">expr</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-39'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-39'>#</a>
+      </div>
+      <p>Expr must be an instance of Expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span>
+                        <span class="n">expr</span><span class="p">,</span> <span class="n">Expression</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;expr must be an instance of Expression&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-40'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-40'>#</a>
+      </div>
+      <p>The expression must also be a pure expression.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">is_pure_expression</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span>
+                                    <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;expr must be a pure expression&quot;</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+                        <span class="n">model</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+                            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+                            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+                            <span class="s2">&quot;w&quot;</span><span class="p">:</span> <span class="n">IntConst</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+                            <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">BoolConst</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">),</span>
+                        <span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-41'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-41'>#</a>
+      </div>
+      <p>Evaluate expressions</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                        <span class="n">e1</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="n">evaluate_expr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">is_pure_expression</span><span class="p">(</span>
+                            <span class="n">e1</span><span class="p">),</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Evaluation should return pure expressions&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-42'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-42'>#</a>
+      </div>
+      <p>Attempt Python eval, which may not work</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                        <span class="n">b1</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">b1</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">pythonize</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e1</span><span class="p">)))</span>
+                        <span class="k">except</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-43'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-43'>#</a>
+      </div>
+      <p>If it doesn&rsquo;t work just set to True</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                            <span class="n">b1</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> should be true.&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e1</span><span class="p">))</span>
+
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Exception was raised when evaluating </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

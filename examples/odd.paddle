@@ -1,0 +1,10 @@
+input x : int;
+// Holes
+hole h : int [
+        G : int -> G + G | G % H | H * G | Var;
+        H : int -> Integer
+];
+// Synthesize something odd
+define a : int = h;
+define is_even : bool = h % 2 = 1;
+assert (is_even);

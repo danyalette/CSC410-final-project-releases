@@ -1,0 +1,9 @@
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input b : bool;
+// Holes
+define hmax : int = b ? x + y : x + y + 230;
+define c : int = 1 + hmax;
+assert ((c >= x) && (c >= y));

@@ -1,0 +1,9 @@
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input b : bool;
+define e1 : bool = b && w > x;
+define e2 : int = !b && w <= x;
+define e3 : bool = b || e2;
+assert e3;

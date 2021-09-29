@@ -1,0 +1,4 @@
+input x : int;
+hole h : int [G : int -> G + G | Var ];
+define c : int = h;
+assert (c = (x * 4));

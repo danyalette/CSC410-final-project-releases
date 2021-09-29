@@ -1,0 +1,9 @@
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input b : bool;
+define a : int = x * y;
+define c : int = y * z;
+define d : bool = a / c;
+assert (d * z = x);

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>transformer.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>transformer.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>CSC410 Final Project: Enumerative Synthesizer
+by Victor Nicolet and Danya Lette</p>
+<p>This file contains the code required to convert a Paddle parse
+tree to a Paddle AST.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">dropwhile</span><span class="p">,</span> <span class="n">takewhile</span>
+<span class="kn">from</span> <span class="nn">lark</span> <span class="kn">import</span> <span class="n">ast_utils</span><span class="p">,</span> <span class="n">Transformer</span><span class="p">,</span> <span class="n">v_args</span>
+<span class="kn">from</span> <span class="nn">lang.ast</span> <span class="kn">import</span> <span class="o">*</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Exception that is raised during the transformation
+of Paddle parse tree to Paddle AST.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">TransformerException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Exception that is raised due to errors in variable creation
+during the transformation of Paddle parse tree to Paddle AST.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">TransformerVariableException</span><span class="p">(</span><span class="n">TransformerException</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Convert a nested list to a flat list.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">nested_list</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nested_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nested_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">nested_list</span>
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">(</span><span class="n">nested_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">flatten</span><span class="p">(</span><span class="n">nested_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">nested_list</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Given a predicate pred and a list lst, return a pair of
+lists (fst, snd) such that:
+    - lst = fst + snd
+    - the first element of snd is the first element of lst
+    that does not satify pred.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">takedrop</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">fst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">takewhile</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">lst</span><span class="p">))</span>
+    <span class="n">snd</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dropwhile</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">lst</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">fst</span><span class="p">,</span> <span class="n">snd</span><span class="p">)</span>
+
+
+<span class="n">this_module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>This class contains methods which are applied in a bottom-up
+fashion to a Paddle parse tree in order to convert the
+parse tree to a Paddle AST.
+The lark parsing library applies the methods of this class
+according to the names of the corresponding nodes in the parse
+tree as specified in the paddle grammar file <code>paddle.lark</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">ToAst</span><span class="p">(</span><span class="n">Transformer</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p><code>program_variables</code> is a map from ids to Variables.
+These correspond to the variables that appear in an input
+declaration, a hole declaration, or an assignment.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">program_variables</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Variable</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p><code>grammar_variables</code> is a map from a hole id to a map
+corresponding to the varirables that appear in that hole&rsquo;s
+grammar.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">grammar_variables</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Variable</span><span class="p">]]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program_variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar_variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>This method should be called upon encountering a variable
+while traversing the parse tree.
+This var is added to self.program_variables so that it may be
+found by name while traversing the remainder of the parse tree.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_add_program_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="n">Variable</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">program_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">TransformerVariableException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Variable with id </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> is declared more than once.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program_variables</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_add_grammar_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hole_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">var</span><span class="p">:</span> <span class="n">Variable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">hole_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grammar_variables</span><span class="p">[</span><span class="n">hole_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar_variables</span><span class="p">[</span><span class="n">hole_id</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">TransformerVariableException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Grammar variable with id </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2"> is declared </span><span class="se">\</span>
+<span class="s2">                    more than once for hole </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">hole_id</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar_variables</span><span class="p">[</span><span class="n">hole_id</span><span class="p">][</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_assign_program_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">program_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">program_variables</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TransformerVariableException</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expression contains unknown variable </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assign_program_variables</span><span class="p">(</span><span class="n">child</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_assign_grammar_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hole_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar_variables</span><span class="p">[</span><span class="n">hole_id</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar_variables</span><span class="p">[</span><span class="n">hole_id</span><span class="p">][</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">program_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">program_variables</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">TransformerVariableException</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Grammar contains unknown variable </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assign_grammar_variables</span><span class="p">(</span><span class="n">hole_id</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">lst</span> <span class="o">=</span> <span class="n">takedrop</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Variable</span><span class="p">),</span> <span class="n">lst</span><span class="p">)</span>
+        <span class="n">holes</span><span class="p">,</span> <span class="n">lst</span> <span class="o">=</span> <span class="n">takedrop</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">HoleDeclaration</span><span class="p">),</span> <span class="n">lst</span><span class="p">)</span>
+        <span class="n">assignments</span><span class="p">,</span> <span class="n">lst</span> <span class="o">=</span> <span class="n">takedrop</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">),</span> <span class="n">lst</span><span class="p">)</span>
+        <span class="n">constraint</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">dropwhile</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">),</span> <span class="n">lst</span><span class="p">))</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Program</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">holes</span><span class="p">,</span> <span class="n">assignments</span><span class="p">,</span> <span class="n">constraint</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">inputdecl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_program_variable</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">var</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">paddletype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">INT</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;bool&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">BOOL</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TransformerException</span><span class="p">(</span><span class="s2">&quot;Could not parse type.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">holedecl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
+            <span class="n">rule_var</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">symbol</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_grammar_variable</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">rule_var</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assign_grammar_variables</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_program_variable</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HoleDeclaration</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">assignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assign_program_variables</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_program_variable</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">assertion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_assign_program_variables</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">intexpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IntConst</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INTEGER</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">boolexpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">BoolConst</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">varexpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">unexpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>UNOP won&rsquo;t be called autmatically it seems</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="n">UnaryExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UNOP</span><span class="p">(</span><span class="n">op</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">binexpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e1</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expression</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>BINOP won&rsquo;t be called autmatically it seems</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="n">BinaryExpr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BINOP</span><span class="p">(</span><span class="n">op</span><span class="p">),</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p>Transform Paddle parse tree to Paddle AST.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">ternexpr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expression</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Ite</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="n">prod_rules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">Grammar</span><span class="p">):</span>
+                <span class="n">prod_rules</span> <span class="o">+=</span> <span class="n">rule</span><span class="o">.</span><span class="n">rules</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">ProductionRule</span><span class="p">):</span>
+                <span class="n">prod_rules</span> <span class="o">+=</span> <span class="p">[</span><span class="n">rule</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Grammar</span><span class="p">(</span><span class="n">prod_rules</span><span class="p">)</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">productionrule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">,</span> <span class="n">production</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">paddletype</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ProductionRule</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">production</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">production</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lst</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">flatten</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
+
+    <span class="nd">@v_args</span><span class="p">(</span><span class="n">inline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">grammarexpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">e</span>
+
+    <span class="k">def</span> <span class="nf">INTEGER</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">BOOL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TransformerException</span><span class="p">(</span><span class="s2">&quot;Could not parse boolean constant.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ID</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">UNOP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnaryOperator</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;abs&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">UnaryOperator</span><span class="o">.</span><span class="n">ABS</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">UnaryOperator</span><span class="o">.</span><span class="n">NEG</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;!&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">UnaryOperator</span><span class="o">.</span><span class="n">NOT</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TransformerException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not parse unary operator &#39;</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">BINOP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryOperator</span><span class="p">:</span>
+        <span class="n">operator_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;+&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">PLUS</span><span class="p">,</span>
+            <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">MINUS</span><span class="p">,</span>
+            <span class="s2">&quot;*&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">TIMES</span><span class="p">,</span>
+            <span class="s2">&quot;/&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">DIV</span><span class="p">,</span>
+            <span class="s2">&quot;%&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">MODULO</span><span class="p">,</span>
+            <span class="s2">&quot;=&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">EQUALS</span><span class="p">,</span>
+            <span class="s2">&quot;!=&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">NOTEQUALS</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">LESSTHAN</span><span class="p">,</span>
+            <span class="s2">&quot;&lt;=&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">LESSTHAN_EQ</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">GREATER</span><span class="p">,</span>
+            <span class="s2">&quot;&gt;=&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">GREATER_EQ</span><span class="p">,</span>
+            <span class="s2">&quot;&amp;&amp;&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">AND</span><span class="p">,</span>
+            <span class="s2">&quot;||&quot;</span><span class="p">:</span> <span class="n">BinaryOperator</span><span class="o">.</span><span class="n">OR</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">operator_map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">operator_map</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="n">TransformerException</span><span class="p">(</span><span class="s2">&quot;Could not parse binary operator.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">GRAMMARCONST</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expression</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;Var&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">GrammarVar</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;Integer&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">GrammarInteger</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TransformerException</span><span class="p">(</span><span class="s2">&quot;Could not parse grammar constant.&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">paddle_transform</span><span class="p">(</span><span class="n">parse_tree</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">transformer</span> <span class="o">=</span> <span class="n">ast_utils</span><span class="o">.</span><span class="n">create_transformer</span><span class="p">(</span><span class="s2">&quot;paddle&quot;</span><span class="p">,</span> <span class="n">ToAst</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">parse_tree</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

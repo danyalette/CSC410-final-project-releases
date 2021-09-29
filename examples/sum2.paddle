@@ -1,0 +1,6 @@
+input x : int;
+input y : int;
+// Holes
+hole h : int [ G : int -> G + G | Var | 0 | 1 ];
+define c : int = h;
+assert (c = x + y);

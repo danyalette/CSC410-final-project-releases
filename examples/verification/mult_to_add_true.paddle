@@ -1,0 +1,4 @@
+input x : int;
+define h : int = x + x + x + x;
+define c : int = h;
+assert (c = (x * 4));

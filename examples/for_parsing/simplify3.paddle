@@ -1,0 +1,7 @@
+input x : int;
+hole h : int [
+                  G : int -> G + G | G - G | G * G | G % G | G / G | B ? G : G | Var | Integer;
+                  B : bool -> G > G | G < G | G = G | B && B | B || B | ! B | True | False
+                ];
+define c : int = h;
+assert (c = (0 > 1)? 8 : (((((x / 2) * 2) + (4 * x) - x) + 12) * 8) * ((x > 9)? 4 : 3));

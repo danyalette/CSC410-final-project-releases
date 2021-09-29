@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>ast_test.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>ast_test.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">lang.ast</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">lang.paddle</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">lark</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">lang.transformer</span> <span class="kn">import</span> <span class="n">TransformerVariableException</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">TestAst</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_ast_well_formed_manual1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">INT</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">INT</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Hole declaration</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">h1_var</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">INT</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">INT</span><span class="p">)</span>
+        <span class="n">h1_rules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ProductionRule</span><span class="p">(</span>
+                <span class="n">g</span><span class="p">,</span> <span class="p">[</span>
+                    <span class="n">BinaryExpr</span><span class="p">(</span><span class="n">BinaryOperator</span><span class="o">.</span><span class="n">PLUS</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">g</span><span class="p">)),</span>
+                    <span class="n">BinaryExpr</span><span class="p">(</span><span class="n">BinaryOperator</span><span class="o">.</span><span class="n">MINUS</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">g</span><span class="p">)),</span>
+                    <span class="n">IntConst</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                    <span class="n">IntConst</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="n">GrammarVar</span><span class="p">()</span>
+                <span class="p">])</span>
+        <span class="p">]</span>
+        <span class="n">h1_grammar</span> <span class="o">=</span> <span class="n">Grammar</span><span class="p">(</span><span class="n">h1_rules</span><span class="p">)</span>
+        <span class="n">h1</span> <span class="o">=</span> <span class="n">HoleDeclaration</span><span class="p">(</span><span class="n">h1_var</span><span class="p">,</span> <span class="n">h1_grammar</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Assignments
+c = a &gt; 0 ? a : h1</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">c</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">INT</span><span class="p">)</span>
+        <span class="n">ceq</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Ite</span><span class="p">(</span>
+            <span class="n">cond</span><span class="o">=</span><span class="n">BinaryExpr</span><span class="p">(</span><span class="n">BinaryOperator</span><span class="o">.</span><span class="n">GREATER</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span>
+            <span class="n">true_br</span><span class="o">=</span><span class="n">VarExpr</span><span class="p">(</span><span class="n">a</span><span class="p">),</span>
+            <span class="n">false_br</span><span class="o">=</span><span class="n">VarExpr</span><span class="p">(</span><span class="n">h1_var</span><span class="p">)))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">PaddleType</span><span class="o">.</span><span class="n">INT</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>d = abs(b) + c</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">deq</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">BinaryExpr</span><span class="p">(</span><span class="n">BinaryOperator</span><span class="o">.</span><span class="n">PLUS</span><span class="p">,</span>
+                                       <span class="n">left_operand</span><span class="o">=</span><span class="n">UnaryExpr</span><span class="p">(</span>
+                                           <span class="n">UnaryOperator</span><span class="o">.</span><span class="n">ABS</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">b</span><span class="p">)),</span>
+                                       <span class="n">right_operand</span><span class="o">=</span><span class="n">VarExpr</span><span class="p">(</span><span class="n">c</span><span class="p">)))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>Final assert: a &gt; 0</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">assertion</span> <span class="o">=</span> <span class="n">BinaryExpr</span><span class="p">(</span><span class="n">BinaryOperator</span><span class="o">.</span><span class="n">GREATER</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">IntConst</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>The whole program:</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">],</span> <span class="p">[</span><span class="n">h1</span><span class="p">],</span> <span class="p">[</span><span class="n">ceq</span><span class="p">,</span> <span class="n">deq</span><span class="p">],</span> <span class="n">assertion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">check_well_formed</span><span class="p">())</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        input b : int;</span>
+<span class="s2">        hole h1 : int [</span>
+<span class="s2">                  G : int -&gt; G + G | G - G | 0 | 1 | Var</span>
+<span class="s2">                ];</span>
+<span class="s2">        define c : int = (a &gt; 0) ? a : h1;</span>
+<span class="s2">        define d : int = (abs b) + c;</span>
+<span class="s2">        assert (a &gt; 0);</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">string</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">program</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_bad_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Inputs should not be declared after holes or assignments</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">bad_program_string_1</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        input b : int;</span>
+<span class="s2">        hole h1 : int [</span>
+<span class="s2">                  G : int -&gt; G + G | G - G | 0 | 1 | Var</span>
+<span class="s2">                ];</span>
+<span class="s2">        define c : int = (a &gt; 0) ? a : h1;</span>
+<span class="s2">        define d : int = (abs b) + c;</span>
+<span class="s2">        input x : int;</span>
+<span class="s2">        assert (a &gt; 0);</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+
+        <span class="n">bad_program_string_2</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        input b : int;</span>
+<span class="s2">        hole h1 : int [</span>
+<span class="s2">                  G : int -&gt; G + G | G - G | 0 | 1 | Var</span>
+<span class="s2">                ];</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        define c : int = (a &gt; 0) ? a : h1;</span>
+<span class="s2">        define d : int = (abs b) + c;</span>
+<span class="s2">        assert (a &gt; 0);</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">UnexpectedCharacters</span><span class="p">,</span>
+                          <span class="n">parse</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="n">bad_program_string_1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">UnexpectedCharacters</span><span class="p">,</span>
+                          <span class="n">parse</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="n">bad_program_string_2</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_bad_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>In the following program, there is more than one rule per nonterminal
+in the grammar</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">bad_program_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        input b : int;</span>
+<span class="s2">        hole h1 : int [</span>
+<span class="s2">                  G : int -&gt; B ? G : G | G + G | G - G | abs G | 0 | 1 | Var;</span>
+<span class="s2">                  G : int -&gt; G + G;</span>
+<span class="s2">                  B : bool -&gt; G &gt; G | G &lt; G | G = G | B &amp;&amp; B | B || B | ! B</span>
+<span class="s2">                ];</span>
+<span class="s2">        define c : int = (a &gt; 0) ? a : h1;</span>
+<span class="s2">        define d : int = (abs b) + c;</span>
+<span class="s2">        assert (a &gt; 0);</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">((</span><span class="n">TransformerVariableException</span><span class="p">,</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">VisitError</span><span class="p">),</span>
+                          <span class="k">lambda</span><span class="p">:</span> <span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">bad_program_string</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_proper_association_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>The expressions a &amp;&amp; c + b and a &amp;&amp; (c + b) should result in the same AST</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">program_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        input b : int;</span>
+<span class="s2">        input c : int;</span>
+<span class="s2">        define d : int = a &amp;&amp; c + b;</span>
+<span class="s2">        define e : int = a &amp;&amp; (c + b);</span>
+<span class="s2">        assert (e &gt; 0);</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">program_string</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Program should have exaclty 2 assignments.&quot;</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="n">d</span><span class="p">),</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> should be equal.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_proper_association_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">program_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        input b : int;</span>
+<span class="s2">        input c : int;</span>
+<span class="s2">        input y : int;</span>
+<span class="s2">        define d : bool = (a &gt; y) &amp;&amp; (c &gt;= b);</span>
+<span class="s2">        define e : bool = a &gt; y &amp;&amp; c &gt;= b;</span>
+<span class="s2">        assert (e);</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">program_string</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Program should have exaclty 2 assignments.&quot;</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">expr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="n">d</span><span class="p">),</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> should be equal.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_hole_can_use</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">program_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        input a : int;</span>
+<span class="s2">        input b : int;</span>
+<span class="s2">        input c : int;</span>
+<span class="s2">        input y : int;</span>
+<span class="s2">        hole h1 : int [ G : int -&gt; Var | Integer | 0 | 1];</span>
+<span class="s2">        define d : bool = (a &gt; y) &amp;&amp; (c &gt;= b);</span>
+<span class="s2">        define e : bool = a &gt; y &amp;&amp; h1 &gt;= b;</span>
+<span class="s2">        assert e;</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="n">Program</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">program_string</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">check_well_formed</span><span class="p">(),</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;program should be well-formed&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">assignments</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Program should have exaclty 2 assignments.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">holes</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Program should have exactly 1 hole.&quot;</span><span class="p">)</span>
+
+        <span class="n">h1_can_use</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">hole_can_use</span><span class="p">(</span><span class="s2">&quot;h1&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">h1_can_use</span><span class="p">),</span> <span class="mi">5</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;h1 should be able to use 5 variables.&quot;</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">get_var_of_name</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;d should be a variable in the program.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">d</span> <span class="ow">in</span> <span class="n">h1_can_use</span><span class="p">,</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;d should be in the variables h1 can use.&quot;</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">prog</span><span class="o">.</span><span class="n">get_var_of_name</span><span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">e</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;e should be a variable in the program.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">e</span> <span class="ow">in</span> <span class="n">h1_can_use</span><span class="p">,</span>
+                         <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;e should not be in the variables h1 can use.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_all_varexpr_has_var</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">examples_directory</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/for_parsing&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.paddle&quot;</span><span class="p">):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ast</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Exception was raised when parsing </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">all_varexpr_has_var</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">all_varexpr_has_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">VarExpr</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="n">Variable</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">all_varexpr_has_var</span><span class="p">(</span><span class="n">child</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_all_program_children_are_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">examples_directory</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/for_parsing&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.paddle&quot;</span><span class="p">):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ast</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                        <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Exception was raised when parsing </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">all_varexpr_has_var</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">all_program_children_are_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Node</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all_program_children_are_nodes</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

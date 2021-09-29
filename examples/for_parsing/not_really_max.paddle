@@ -1,0 +1,9 @@
+input x : int;
+input y : int;
+// Holes
+hole hmax : int [
+                  G : int -> G + G | B ? G : G | Var | 0 | 1;
+                  B : bool -> G > G | G < G | G = G | B && B | B || B | ! B
+                ];
+define c : int = 1 + hmax; // Var in the rule of G is x or y
+assert ((c >= x) && (c >= y));

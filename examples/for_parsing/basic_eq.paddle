@@ -1,0 +1,2 @@
+input x : int; 
+assert (x = x);

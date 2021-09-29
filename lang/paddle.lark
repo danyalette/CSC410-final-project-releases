@@ -1,0 +1,76 @@
+program: inputdecl* holedecl* assignment* assertion
+// Input variable declaration
+inputdecl: "input" ID ":" paddletype";"
+// Type is bool or int
+paddletype: PADDLETYPE
+// Hole Declaration
+holedecl: "hole" ID ":" paddletype "[" grammar "]" ";"
+// Statement assigning value to fresh variable
+assignment: "define" ID ":" paddletype "=" expression ";"
+// The assert is just a boolean expression
+assertion: "assert" expression ";"
+
+expression: conditionalexpression | unaryexpression
+
+unaryexpression:
+      | primaryexpression -> expression
+      | UNOP expression -> unexpr
+conditionalexpression:
+      | lorexpression -> expression
+      | ternexpr -> expression
+!lorexpression:
+      | landexpression -> expression
+      | lorexpression "||" landexpression -> binexpr
+!landexpression:
+      | equalityexpression -> expression
+      | landexpression "&&" equalityexpression -> binexpr
+!equalityexpression:
+      | relexpression -> expression
+      | equalityexpression "=" relexpression -> binexpr
+      | equalityexpression "!=" relexpression -> binexpr
+!relexpression:
+      | addexpression -> expression
+      | relexpression "<=" addexpression -> binexpr
+      | relexpression ">=" addexpression -> binexpr
+      | relexpression "<" addexpression -> binexpr
+      | relexpression ">" addexpression -> binexpr
+!addexpression: // Associates right to left
+      | multexpression -> expression
+      | multexpression "+" addexpression -> binexpr
+      | multexpression "-" addexpression -> binexpr
+!multexpression: // Associates left to right
+      | unaryexpression -> expression
+      | multexpression "*" unaryexpression -> binexpr
+      | multexpression "/" unaryexpression -> binexpr
+      | multexpression "%" unaryexpression -> binexpr
+primaryexpression: -> expression
+      | INTEGER -> intexpr
+      | BOOL -> boolexpr
+      | ID -> varexpr
+      | "(" expression ")" -> expression
+ternexpr: expression "?" expression ":" expression // Ternary (if-then-else) expression
+
+// A grammar has at least one production rule.The first production rule is the "main" rule of the grammar and uses the top-level symbol.
+grammar: productionrule | productionrule ";" grammar
+// A production rule maps an ID to a production
+productionrule: ID ":" paddletype "->" production
+// Integer stands for any integer, Var stands for any variable
+grammarexpression: GRAMMARCONST | expression
+// A production is an list of expressions separated by "|"
+production: grammarexpression | grammarexpression " | " production
+// A grammar expression is an expression or the special keywords Var and Constant
+
+
+%import common.WS
+%import common.CNAME -> ID
+%import common.INT -> INTEGER
+
+BOOL: "True" | "False"
+COMMENT: "//" /[^\n]/*
+UNOP: "abs" | "-" | "!"
+PADDLETYPE: "bool" | "int"
+GRAMMARCONST: "Var" | "Integer"
+PRODSEP: "|"
+
+%ignore WS
+%ignore COMMENT

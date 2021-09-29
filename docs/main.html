@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>main.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>main.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <h1>CSC410 Final Project: Enumerative Synthesizer</h1>
+<p>by Victor Nicolet and Danya Lette</p>
+<p>This is the main entry point for this project.</p>
+<p>Open the documentation in your browser, e.g. open <code>docs/main.html</code>.
+The documentation for <code>pycco</code> is available <a href="https://pycco-docs.github.io/pycco/">here</a>.</p>
+<h1>Group Members</h1>
+<p>TODO: Remove me, and write the names and UTORids of the group members.</p>
+<h1>Roles and Tasks</h1>
+<p>TODO: Remove me, and write a <em>very brief</em> description of what each team member
+did in the project.</p>
+<hr />
+<p>Good luck, you&rsquo;ll be writing your first program synthesizer!</p>
+<h1>Reminders from the handout</h1>
+<p>This is the list of files you will have to modify:
+-  <a href="student_test.html">test/student_test.py</a></p>
+<ul>
+<li>
+<p><a href="symb_eval.html">lang/symb_eval.py</a></p>
+</li>
+<li>
+<p><a href="verifier.html">verification/verifier.py</a></p>
+</li>
+<li>
+<p><a href="synth.html">synthesis/synth.py</a></p>
+</li>
+</ul>
+<p>To understand how a Paddle program is represented, you can have a look at
+ <a href="ast.html">lang/ast.py</a>.</p>
+<p>We encourage you to look at the examples in <code>examples/</code> and add your
+own there!</p>
+<h2>Linting</h2>
+<p>The following command should return <code>0</code>:</p>
+<p><code>flake8 . --count --exit-zero --max-line-length=127 --ignore F,W503,W504,E722</code></p>
+<h2>Testing</h2>
+<p>The following command should succeed:</p>
+<p><code>python test.py</code></p>
+<p>You should also uncomment the relevant tests as you make progress.</p>
+<h2>Documenting</h2>
+<p>You should document your code, and generate the documentation using:</p>
+<p><code>pycco *.py **/*.py</code></p>
+<hr />
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">lang.paddle</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">from</span> <span class="nn">lang.ast</span> <span class="kn">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">lang.symb_eval</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+<span class="kn">from</span> <span class="nn">synthesis.synth</span> <span class="kn">import</span> <span class="n">Synthesizer</span>
+<span class="kn">from</span> <span class="nn">verification.verifier</span> <span class="kn">import</span> <span class="n">is_valid</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>You can modifiy this variable. It limits how many times the synthesis loop
+will call the synthesis method, which is necessary in case there is no
+solution to the synthesis problem, or the program is very complex and waiting
+for the loop to find it would take too long.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">ITERATIONS_LIMIT</span> <span class="o">=</span> <span class="mi">1000</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>Print usage information for this file.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">usage</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Usage: python3 main.py METHOD_NUM INPUT_FILE&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Print the solution, which is a map from hole IDs to expressions.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">print_solution</span><span class="p">(</span><span class="n">solution_map</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Expression</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">solution_map</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The solution for </span><span class="si">{</span><span class="n">hole</span><span class="si">}</span><span class="s2"> is </span><span class="si">{</span><span class="n">solution_map</span><span class="p">[</span><span class="n">hole</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please provide a method number and an input file!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;There are some example inputs in ./examples/&quot;</span><span class="p">)</span>
+        <span class="n">usage</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>! Important !
+YOU SHOULD NOT MODIFY THE NAME OF THE VARIABLES USED BELOW THIS LINE!
+YOU CAN ONLY ADD NEW VARIABLES, OR PRINT STATEMENTS</p>
+<p>Get the method that should be used</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">method_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Get the name of the input file</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">filename</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>Parse the input file into an AST</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">ast</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Initialize a Synthesizer with it</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">synt</span> <span class="o">=</span> <span class="n">Synthesizer</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Iterate until a solution is found or iteration limit is reached</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">iterations</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">iterations</span> <span class="o">&lt;</span> <span class="n">ITERATIONS_LIMIT</span><span class="p">:</span>
+        <span class="n">iterations</span> <span class="o">+=</span> <span class="mi">1</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>At each call of the methods of the synthesizer a new
+hole completion should be returned.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">method_num</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">hole_completions</span> <span class="o">=</span> <span class="n">synt</span><span class="o">.</span><span class="n">synth_method_3</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">method_num</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">hole_completions</span> <span class="o">=</span> <span class="n">synt</span><span class="o">.</span><span class="n">synth_method_2</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hole_completions</span> <span class="o">=</span> <span class="n">synt</span><span class="o">.</span><span class="n">synth_method_1</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>Evaluate the program with these completions</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">(</span><span class="n">hole_completions</span><span class="p">)</span>
+        <span class="n">final_constraint_expr</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Verify the program, if it is valid it is a solution!</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">is_valid</span><span class="p">(</span><span class="n">final_constraint_expr</span><span class="p">):</span>
+            <span class="n">print_solution</span><span class="p">(</span><span class="n">hole_completions</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>Otherwise the loop continues.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

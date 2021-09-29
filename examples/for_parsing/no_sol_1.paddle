@@ -1,0 +1,4 @@
+input x : int;
+hole h : int [G : int -> Integer ];
+define c : int = x + h;
+assert (c = 0);

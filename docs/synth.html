@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>synth.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>synth.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>CSC410 Final Project: Enumerative Synthesizer
+by Victor Nicolet and Danya Lette</p>
+<p>Fill in this file to complete the synthesis portion
+of the assignment.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">lang.ast</span> <span class="kn">import</span> <span class="o">*</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>This class is has three methods <code>synth_method_1</code>, <code>synth_method_2</code> or
+<code>synth_method_3</code> for generating expression for a program&rsquo;s holes.</p>
+<p>You may also choose to add data attributes and methods to this class
+to enable instances of <code>Synthesizer</code> to remember information about
+previous runs.</p>
+<p>Calling <code>synth_method_1</code>, <code>synth_method_2</code> or <code>synth_method_3</code> should
+produce a new set of hole completions at each call for a given
+<code>Synthesizer</code> instance.
+For example, suppose the program p contains one hole <code>h1</code> with the
+grammar <code>[ G : int -&gt; G + G | 0 | 1 ]</code>. Then, the following sequence
+is a possible execution:</p>
+<pre><code>&gt; s = Synthesizer(p)
+&gt; s.synth_method_1()
+{ &quot;h1&quot; : 0 }
+&gt; s.synth_method_1()
+{ &quot;h1&quot; : 1 }
+&gt; s.synth_method_1()
+{ &quot;h1&quot; : 0 + 1 }
+...
+</code></pre>
+<p>Each call produces a hole completion. The returned object should
+be a mapping from the hole id (its name) to the expression of the
+hole.
+Each <code>synth_method_..</code> should implement a different enumeration
+strategy (e.g. depth first, breadth first, constants-first,
+variables-first&hellip;).</p>
+<p><strong>Don&rsquo;t forget that we expect your third method to be the best on
+average!</strong></p>
+<p><em>Hint</em>: the method <code>hole_can_use</code> in the <code>Program</code> class returns the
+set of variables that a given hole can use in its completions.
+e.g. <code>prog.hole_can_use("h1")</code> returns the variables that &ldquo;h1&rdquo; can use.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">Synthesizer</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Initialize the Synthesizer.
+The Synthesizer can have a state or other data attributes and
+methods to remember which programs have been synthesized before.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">:</span> <span class="n">Program</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="kc">None</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>The synthesizer is initialized with the program ast it needs
+to synthesize hole completions for.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">ast</span> <span class="o">=</span> <span class="n">ast</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>TODO: implement something that allows you to remember which
+programs have already been generated.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Returns a map from each hole id in the program <code>self.ast</code>
+to an expression (method 1).</p>
+<p><strong>TODO: write a description of your approach in this method.</strong></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">synth_method_1</span><span class="p">(</span><span class="bp">self</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Expression</span><span class="p">]:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>TODO : complete this method</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Synth.Synthesizer.synth_method_1 is not implemented.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Returns a map from each hole id in the program <code>self.ast</code>
+to an expression (method 2).</p>
+<p><strong>TODO: write a description of your approach in this method.</strong></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">synth_method_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Expression</span><span class="p">]:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>TODO : complete this method</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Synth.Synthesizer.synth_method_2 is not implemented.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Returns a map from each hole id in the program <code>self.ast</code>
+to an expression (method 3).</p>
+<p><strong>TODO: write a description of your approach in this method.</strong></p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">synth_method_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Expression</span><span class="p">]:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>TODO : complete this method</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Synth.synth_method_3 is not implemented.&quot;</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

@@ -1,0 +1,8 @@
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input b : bool;
+define hmax : int = (x < y) ? x : y;
+define c : int = hmax;
+assert ((! (c >= x && c >= y)) && (c = x || x = y));

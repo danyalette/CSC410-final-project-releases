@@ -1,0 +1,4 @@
+input x : int;
+hole h : int [G : int -> Integer];
+define c : int = h;
+assert (c = ((x > x) ? x : 0));

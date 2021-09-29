@@ -1,0 +1,9 @@
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input v : int;
+// Holes
+hole h : int [ G : int -> G + G | Var | 0 | 1 ];
+define c : int = h;
+assert (c = x + y + z + w + v);

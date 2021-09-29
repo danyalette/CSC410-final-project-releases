@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>enumerate_test.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>enumerate_test.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>CSC410 Final Project: Enumerative Synthesizer
+by Victor Nicolet and Danya Lette</p>
+<p>This file contains some tests of enumeration.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">lang.ast</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">lang</span> <span class="kn">import</span> <span class="n">paddle</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">synthesis.synth</span> <span class="kn">import</span> <span class="n">Synthesizer</span>
+<span class="kn">import</span> <span class="nn">os</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <pre><code>Checks that a hole completion is well-formed:
+- the hole completion should be a dictionary with keys: hole ids and data: Expressions.
+- each key of the dictionary should be a string,
+- each value should be an Expression
+- each Expression should be pure, that is, there is no grammar symbol left in it, and there
+    is no grammar expression left in it.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">check_well_formed</span><span class="p">(</span><span class="n">prog</span><span class="p">:</span> <span class="n">Program</span><span class="p">,</span> <span class="n">hole_map</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Expression</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">Program</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hole_map</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">hole_id</span><span class="p">,</span> <span class="n">hole_completion</span> <span class="ow">in</span> <span class="n">hole_map</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>the keys should be strings</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hole_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>the data should be an expression</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hole_completion</span><span class="p">,</span> <span class="n">Expression</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>the expression should be &ldquo;pure&rdquo;, i.e not contain
+any GrammarVar or GrammarInteger</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="ow">not</span> <span class="n">prog</span><span class="o">.</span><span class="n">is_pure_expression</span><span class="p">(</span><span class="n">hole_completion</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">TestEnumerator</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_interface_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">synth_method_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;synth_method_1&quot;</span><span class="p">,</span>
+                              <span class="s2">&quot;synth_method_2&quot;</span><span class="p">,</span> <span class="s2">&quot;synth_method_3&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">mname</span> <span class="ow">in</span> <span class="n">synth_method_names</span><span class="p">:</span>
+            <span class="n">m1_exists</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Synthesizer</span><span class="p">,</span> <span class="n">mname</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">Synthesizer</span><span class="p">,</span> <span class="n">mname</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">m1_exists</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Make sure the </span><span class="si">{</span><span class="n">mname</span><span class="si">}</span><span class="s2"> method in Evaluator is implemented.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">base_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+        <span class="n">examples_directory</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_path</span><span class="si">}</span><span class="s2">/examples&quot;</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.paddle&quot;</span><span class="p">):</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">examples_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                <span class="n">ast</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ast</span> <span class="o">=</span> <span class="n">paddle</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>In order to see the name of the malformed file in this test output:</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Failed parsing file </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Initialize a Synthesizer</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">s</span> <span class="o">=</span> <span class="n">Synthesizer</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Check the well-formedness of all the expressions</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">prev_h1</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">prev_h2</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">prev_h3</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>Call all the methods : 1, 2 and 3</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="n">synth_h1</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">synth_method_1</span><span class="p">()</span>
+                    <span class="n">synth_h2</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">synth_method_2</span><span class="p">()</span>
+                    <span class="n">synth_h3</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">synth_method_3</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>The map returned should be different from the previous one.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">synth_h1</span> <span class="o">==</span> <span class="n">prev_h1</span> <span class="ow">or</span> <span class="n">synth_h2</span> <span class="o">==</span> <span class="n">prev_h2</span> <span class="ow">or</span> <span class="n">synth_h3</span> <span class="o">==</span> <span class="n">prev_h3</span><span class="p">,</span>
+                                     <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;The synth_method_i should return a new program at every call.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>Check that all the maps are well-formed, according to the checkwf function.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">check_well_formed</span><span class="p">(</span><span class="n">ast</span><span class="p">,</span> <span class="n">synth_h1</span><span class="p">),</span>
+                                    <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;The synth_method should return well-formed maps from hole ids to expressions.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">check_well_formed</span><span class="p">(</span><span class="n">ast</span><span class="p">,</span> <span class="n">synth_h2</span><span class="p">),</span>
+                                    <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;The synth_method should return well-formed maps from hole ids to expressions.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">check_well_formed</span><span class="p">(</span><span class="n">ast</span><span class="p">,</span> <span class="n">synth_h3</span><span class="p">),</span>
+                                    <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;The synth_method should return well-formed maps from hole ids to expressions.&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Update the prev variables.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="n">prev_h1</span> <span class="o">=</span> <span class="n">synth_h1</span>
+                    <span class="n">prev_h2</span> <span class="o">=</span> <span class="n">synth_h2</span>
+                    <span class="n">prev_h3</span> <span class="o">=</span> <span class="n">synth_h3</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

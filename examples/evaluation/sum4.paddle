@@ -1,0 +1,11 @@
+// Evaluation examples are required to have x,y,z,w as int inputs and b as bool input.
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input b : bool;
+// Holes
+define a : int = x + z;
+define h : int = a + x + y + w;
+define c : int = h - x;
+assert (c = w + x + y + z);

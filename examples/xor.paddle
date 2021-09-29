@@ -1,0 +1,7 @@
+input x1 : bool;
+input x2 : bool;
+// Hole
+hole h : bool [ B : bool -> B && B | B || B | !B ];
+define res : bool = h;
+// Synthesize xor : res is true is x1 xor x1
+assert (x1 ? (x2 ? !res : res) : (x2 ? res : !res));
