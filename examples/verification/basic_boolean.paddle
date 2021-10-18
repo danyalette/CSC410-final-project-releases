@@ -1,0 +1,8 @@
+input b1 : bool;
+input b2 : bool;
+input b3 : bool;
+input b4 : bool;
+define x : bool = (! b1) || b3;
+define y : bool = (! b2) || b4;
+define z : bool = x && y;
+assert( b1 || b2 || z);

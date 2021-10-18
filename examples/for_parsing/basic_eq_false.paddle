@@ -1,2 +1,2 @@
-input x : int; 
+input x : int;
 assert (x = 1);

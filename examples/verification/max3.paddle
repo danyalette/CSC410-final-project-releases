@@ -2,6 +2,6 @@ input x : int;
 input y : int;
 input z : int;
 // Holes
-define hmax : int = x > y ? (x > z ? x : z) : (z > y ? y : z);
+define hmax : int = x > y ? (x > z ? x : z) : (z > y ? z : y);
 define c : int = hmax; // Var in the rule of G is x or y or z
-assert (((c >= x) && (c >= y) && (c >= z)) && (c = z || c = x || x = y));
+assert (((c >= x) && (c >= y) && (c >= z)) && (c = z || c = x || c = y));

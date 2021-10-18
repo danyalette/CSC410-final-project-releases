@@ -1,0 +1,5 @@
+input a : int;
+input b : int;
+define c : int = a + b;
+define d : int = c * c;
+assert (d >= 0);

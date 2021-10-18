@@ -3,4 +3,4 @@ input y : int;
 // In verification files, just replace the hole definition by an assignment
 define hmax : int = x > y ? x : y;
 define c : int = hmax; // Var in the rule of G is x or y
-assert (((c >= x) && (c >= y)) && (c = x || x = y));
+assert (((c >= x) && (c >= y)) && (c = x || c = y));

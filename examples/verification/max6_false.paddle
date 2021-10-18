@@ -1,0 +1,15 @@
+input x : int;
+input y : int;
+input z : int;
+input w : int;
+input v : int;
+input u : int;
+define max_x_y : int  = x > y ? x : y;
+define max_z_w : int = z > w ? z : w;
+define max_u_v : int = u > v ? v : u;
+define c0 : int = max_x_y > max_z_w ? max_x_y : max_z_w;
+define c : int = c0 > max_u_v ? c0 : max_u_v;
+
+assert (((c >= x) && (c >= y) && (c >= z) && (c >= w) && (c >= u) && (c >= v))
+            &&
+         (c = w || c = z || c = x || c = y || c = u || c = v));

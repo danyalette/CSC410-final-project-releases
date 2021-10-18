@@ -5,5 +5,5 @@ input w : int;
 // Holes
 define h : int = x + y + w;
 define a : int = x + z;
-define c : int = a + h - x;
+define c : int = h - x;
 assert (c = w + x + y + z);

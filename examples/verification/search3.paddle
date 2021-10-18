@@ -1,0 +1,13 @@
+input a1 : int;
+input a2 : int;
+input a3 : int;
+input x : int;
+
+define index : int = ((a1 = x) ? 1 :
+                        ((a2 = x) ? 2 :
+                            ((a3 = x) ? 3 :
+                                -1)));
+
+assert(
+        (! (x = a1 || x = a1 || x = a3))
+        || (index > 0));

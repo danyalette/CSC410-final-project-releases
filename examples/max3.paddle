@@ -7,4 +7,4 @@ hole hmax : int [
                   B : bool -> G > G | G < G | G = G | B && B | B || B | ! B
                 ];
 define c : int = hmax; // Var in the rule of G is x or y or z
-assert (((c >= x) && (c >= y) && (c >= z)) && (c = z || c = x || x = y));
+assert (((c >= x) && (c >= y) && (c >= z)) && (c = z || c = x || c = y));

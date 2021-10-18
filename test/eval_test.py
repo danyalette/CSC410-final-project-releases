@@ -102,7 +102,7 @@ class TestEval(unittest.TestCase):
         self.assertFalse(eval(str(lhs)) == eval(str(rhs)))
 
     def test_example_sum4c(self):
-        filename = '%s/examples/verification/sum4c.paddle' % Path(
+        filename = '%s/examples/verification/sum4c_false.paddle' % Path(
             __file__).parent.parent.absolute()
         if not os.path.exists(filename):
             raise Exception(
