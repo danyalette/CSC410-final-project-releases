@@ -200,7 +200,7 @@ hole completion should be returned.</p>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/sum</span><span class="si">%i</span><span class="s1">.paddle&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">(),</span> <span class="n">i</span><span class="p">)</span>
-            <span class="n">testFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></pre></div>
+            <span class="n">testFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -215,7 +215,7 @@ hole completion should be returned.</p>
       <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_on_xor_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/xor.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
             <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
-        <span class="n">testFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></pre></div>
+        <span class="n">testFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -230,7 +230,7 @@ hole completion should be returned.</p>
       <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_on_abs_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/abs.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
             <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
-        <span class="n">testFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></pre></div>
+        <span class="n">testFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -245,7 +245,7 @@ hole completion should be returned.</p>
       <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_on_even_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/even.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
             <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
-        <span class="n">testFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></pre></div>
+        <span class="n">testFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -260,7 +260,7 @@ hole completion should be returned.</p>
       <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_on_odd_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/odd.paddle&#39;</span> <span class="o">%</span> <span class="n">Path</span><span class="p">(</span>
             <span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
-        <span class="n">testFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></pre></div>
+        <span class="n">testFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -276,7 +276,7 @@ hole completion should be returned.</p>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/examples/max</span><span class="si">%i</span><span class="s1">.paddle&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">absolute</span><span class="p">(),</span> <span class="n">i</span><span class="p">)</span>
-            <span class="n">testFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">testFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
 </pre></div>
     </div>
