@@ -1,6 +1,6 @@
 input x : int;
 hole h : int [
-                  G : int -> G + G | G - G | B ? G : G | Var | 0 | 1;
+                  G : int -> Var | 0 | G + G | G - G | B ? G : G ;
                   B : bool -> G > G | G < G | G = G | B && B | B || B | ! B
                 ];
 define c : int = h;

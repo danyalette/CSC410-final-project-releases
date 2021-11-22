@@ -2,8 +2,8 @@ input x : int;
 input y : int;
 // Holes
 hole hmax : int [
-                  G : int -> G + G | B ? G : G | Var | 0 | 1;
-                  B : bool -> G > G | G < G | G = G | B && B | B || B | ! B
+                  G : int -> B ? G : G | Var;
+                  B : bool -> G > G | G = G | B && B | B || B | ! B | True | False
                 ];
 define c : int = hmax; // Var in the rule of G is x or y
 assert (((c >= x) && (c >= y)) && (c = x || c = y));

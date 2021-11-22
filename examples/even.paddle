@@ -1,7 +1,7 @@
 input x : int;
 // Holes
 hole h : int [
-        G : int -> G + G | G % H | H * G | Var;
+        G : int -> G + G | G % H | H * G | H | Var;
         H : int -> Integer
 ];
 // Synthesize something even

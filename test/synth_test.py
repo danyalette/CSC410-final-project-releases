@@ -62,30 +62,30 @@ class TestSynth(unittest.TestCase):
         for i in range(2, 4):
             filename = '%s/examples/sum%i.paddle' % (
                 Path(__file__).parent.parent.absolute(), i)
-            testFile(filename)
+            testFile(self, filename)
 
     def test_on_xor_input(self,):
         filename = '%s/examples/xor.paddle' % Path(
             __file__).parent.parent.absolute()
-        testFile(filename)
+        testFile(self, filename)
 
     def test_on_abs_input(self,):
         filename = '%s/examples/abs.paddle' % Path(
             __file__).parent.parent.absolute()
-        testFile(filename)
+        testFile(self, filename)
 
     def test_on_even_input(self,):
         filename = '%s/examples/even.paddle' % Path(
             __file__).parent.parent.absolute()
-        testFile(filename)
+        testFile(self, filename)
 
     def test_on_odd_input(self,):
         filename = '%s/examples/odd.paddle' % Path(
             __file__).parent.parent.absolute()
-        testFile(filename)
+        testFile(self, filename)
 
     def test_on_max_inputs(self,):
         for i in range(2, 3):
             filename = '%s/examples/max%i.paddle' % (
                 Path(__file__).parent.parent.absolute(), i)
-            testFile(filename)
+            testFile(self, filename)

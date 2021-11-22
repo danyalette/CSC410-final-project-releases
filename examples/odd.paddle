@@ -1,7 +1,8 @@
 input x : int;
 // Holes
 hole h : int [
-        G : int -> G + G | G % H | H * G | Var;
+        G : int -> G + G | G % H | B ? H : H | Var;
+        B : bool -> G > G | G = G;
         H : int -> Integer
 ];
 // Synthesize something odd
