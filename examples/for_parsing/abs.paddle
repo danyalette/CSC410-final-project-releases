@@ -3,5 +3,5 @@ input y : int;
 // Holes
 hole h2 : int [G : int -> G - G | Var | 0 | 1];
 define c : int = x > 0 ? x : h2; // h2 appears here first : Var = x or y
-define d : int = abs(y) + c;
+define d : int = (abs y) + c;
 assert (d > 0);

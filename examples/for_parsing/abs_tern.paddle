@@ -4,4 +4,4 @@ hole h : int [
                   B : bool -> G > G | G < G | G = G | B && B | B || B | ! B
                 ];
 define c : int = h;
-assert (abs x = h);
+assert ((abs x) = h);

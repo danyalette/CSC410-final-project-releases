@@ -1,4 +1,4 @@
 input x : int;
 hole h : int [G : int -> G - G | abs G | Var | Integer ];
-define c : int = abs(x) + h;
+define c : int = (abs x) + h;
 assert (c = 0);
