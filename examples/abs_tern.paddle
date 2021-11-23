@@ -1,7 +1,7 @@
 input x : int;
 hole h : int [
-                  G : int -> Var | 0 | G + G | G - G | B ? G : G ;
-                  B : bool -> G > G | G < G | G = G | B && B | B || B | ! B
+                  G : int -> Var | 0 | G + G | - G | B ? G : G ;
+                  B : bool -> G > G | G = G | B && B | ! B
                 ];
 define c : int = h;
-assert (abs x = h);
+assert ((abs x) = h);

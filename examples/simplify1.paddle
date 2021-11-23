@@ -1,7 +1,8 @@
 input x : int;
 hole h : int [
-                  G : int -> G + G | G - G | G * G | G % G | G / G | B ? G : G | Var | Integer;
+                  G : int -> G + G | G - G | G * G | G % G | abs G | G / G | B ? G : G | Var | Integer;
                   B : bool -> G > G | G < G | G = G | B && B | B || B | ! B | True | False
                 ];
 define c : int = h;
-assert (c = ((x > 0) ? abs x : (abs (0 - x))));
+define d : int = ((x > 0) ? abs x : (abs (0 - x)));
+assert (c = d);

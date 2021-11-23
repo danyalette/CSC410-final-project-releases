@@ -83,8 +83,8 @@ class TestEnumerator(unittest.TestCase):
                         continue
 
                     # The map returned should be different from the previous one.
-                    # self.assertFalse(synth_h1 == prev_h1 or synth_h2 == prev_h2 or synth_h3 == prev_h3,
-                    #                 msg="The synth_method_i should return a new program at every call.")
+                    self.assertFalse(synth_h1 == prev_h1 or synth_h2 == prev_h2 or synth_h3 == prev_h3,
+                                     msg="The synth_method_i should return a new program at every call.")
                     # Check that all the maps are well-formed, according to the checkwf function.
                     self.assertTrue(check_well_formed(ast, synth_h1),
                                     msg="The synth_method should return well-formed maps from hole ids to expressions.")

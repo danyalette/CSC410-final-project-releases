@@ -3,8 +3,8 @@ input y : int;
 input z : int;
 // Holes
 hole hmax : int [
-                  G : int -> G + G | B ? G : G | Var | 0 | 1;
-                  B : bool -> G > G | G < G | G = G | B && B | B || B | ! B
+                  G : int -> G + G | B ? G : G | Var | 0;
+                  B : bool -> G > G | G = G | ! B
                 ];
 define c : int = hmax; // Var in the rule of G is x or y or z
 assert (((c >= x) && (c >= y) && (c >= z)) && (c = z || c = x || c = y));

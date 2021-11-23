@@ -1,7 +1,7 @@
 input x : int;
 input d : int;
-hole h1 : int [G : int -> G + G | G - G | G / G | G * G | G % G | - G | Var | Integer ];
-hole h2 : int [G : int -> G + G | G - G | G / G | G * G | G % G | - G | Var | Integer ];
+hole h1 : int [G : int -> G + G | G / G | G * G | - G | Var | Integer ];
+hole h2 : int [G : int -> G + G | G % G | G * G | - G | Var | Integer ];
 define q : int = h1;
 define r : int = h2;
-assert (x = (q * d) + r);
+assert (x > 2* d && d > 0 ? (x = (q * d) + r && q > 0) : True);

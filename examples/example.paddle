@@ -1,0 +1,18 @@
+input x : int;
+input y : int;
+hole h : int [
+    G : int -> G + G | ITE | Var | 0 | 1;
+    ITE : int -> B ? G : G; // if B then G else G
+    B : bool -> G > G | G = G | B && B | ! B
+    ];
+// h = 0
+// h = 1 + 0
+// ..
+// h = x > y ? x : y
+define c : int = h;
+assert (
+    (c >= x && c >= y) &&
+    (c = x || x = y));
+
+// Project starter code:
+// git clone https://github.com/danyalette/CSC410-final-project-releases

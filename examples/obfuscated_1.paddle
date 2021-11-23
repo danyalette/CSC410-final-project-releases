@@ -1,0 +1,12 @@
+input x1 : bool;
+input x2 : bool;
+input x3 : int;
+input x4 : int;
+// Hole
+hole h : int [
+                 G : int -> G + G | G - G | Var | Integer | H ;
+                 H : int -> 0 | 1 | 2 | G
+            ];
+define res : int = h;
+// Synthesize xor : res is true iff x2 xor x1
+assert (x1 ? (x2 ? res + res = 2 : res + 1 = 2) : (x2 ? (res + res = 3 + (- res)) : (- res) = (1 + (- 2))));

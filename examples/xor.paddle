@@ -4,4 +4,4 @@ input x2 : bool;
 hole h : bool [ B : bool -> B && B | B || B | !B | Var ];
 define res : bool = h;
 // Synthesize xor : res is true iff x2 xor x1
-assert (x1 ? (x2 ? !res : res) : (x2 ? !res : res));
+assert (x1 ? (x2 ? !res : res) : (x2 ? res : !res));
